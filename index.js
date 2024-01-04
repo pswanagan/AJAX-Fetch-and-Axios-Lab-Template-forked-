@@ -1,4 +1,4 @@
-import * as Carousel from "./Carousel.js";
+import { clear, appendCarousel, createCarouselItem } from "./Carousel.js";
 import axios from "axios";
 
 // The breed selection input element.
@@ -41,6 +41,14 @@ async function initialLoad() {
       option.textContent = breed.name; // Set the display text to the breed's name
       breedSelect.appendChild(option);
     });
+
+    breedSelect.addEventListener("change", handleBreedSelection);
+
+    // Trigger handleBreedSelection to load the initial carousel
+    // This will work if there's a default selected option in breedSelect
+    if (breedSelect.value) {
+      handleBreedSelection({ target: breedSelect });
+    }
   } catch (error) {
     console.error("Failed to load breeds:", error);
   }
@@ -63,6 +71,62 @@ initialLoad();
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
 
+async function handleBreedSelection(event) {
+  const breedId = event.target.value;
+  const breedName = event.target.options[event.target.selectedIndex].text;
+  const apiUrl = `https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}&limit=10&hasBreed=1&api_key=${API_KEY}`;
+
+  try {
+    const response = await fetch(apiUrl);
+    const breedImages = await response.json();
+
+    // Clearing existing carousel items
+    clear();
+
+    breedImages.forEach((image) => {
+      // Create new carousel item
+      console.log(image);
+      const carouselElement = createCarouselItem(
+        image.url,
+        `Image of ${breedName}`,
+        image.id,
+      );
+      appendCarousel(carouselElement);
+    }); // Update infoDump with breed information
+    const infoDump = document.getElementById("infoDump");
+    infoDump.innerHTML = ""; // Clear existing content
+
+    if (breedImages.length > 0 && breedImages[0].breeds.length > 0) {
+      const breed = breedImages[0].breeds[0];
+      const infoContent = document.createElement("div");
+
+      // Add the breed's name, description, and other details you want to display
+      infoContent.innerHTML = `
+        <h3>${breed.name}</h3>
+        <p>${breed.description}</p>
+        <p>Temperament: ${breed.temperament}</p>
+        <p>Life Span: ${breed.life_span} years</p>
+        <p>Weight: ${breed.weight.metric} kg</p>
+        <p>Origin: ${breed.origin}</p>
+      `;
+
+      infoDump.appendChild(infoContent);
+    } else {
+      infoDump.innerHTML = "<p>Breed information not available.</p>";
+    }
+  } catch (error) {
+    console.error("Error fetching breed information:", error);
+  }
+}
+// Attach the event listener to breedSelect
+document.addEventListener("DOMContentLoaded", () => {
+  const breedSelect = document.getElementById("breedSelect");
+  if (breedSelect) {
+    breedSelect.addEventListener("change", handleBreedSelection);
+  } else {
+    console.error("breedSelect element not found");
+  }
+});
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
  */
