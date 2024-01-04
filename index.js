@@ -30,10 +30,7 @@ async function initialLoad() {
     // Fetching the list of breeds from the cat API
     const response = await fetch(apiUrl);
     const breeds = await response.json();
-
-    // Assuming breedSelect is the ID of your <select> element
     const breedSelect = document.getElementById("breedSelect");
-
     // Creating and appending options for each breed
     breeds.forEach((breed) => {
       const option = document.createElement("option");

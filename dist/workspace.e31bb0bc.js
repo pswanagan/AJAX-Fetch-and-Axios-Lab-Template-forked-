@@ -12294,7 +12294,6 @@ function _initialLoad() {
           return response.json();
         case 7:
           breeds = _context.sent;
-          // Assuming breedSelect is the ID of your <select> element
           _breedSelect = document.getElementById("breedSelect"); // Creating and appending options for each breed
           breeds.forEach(function (breed) {
             var option = document.createElement("option");
